@@ -4,7 +4,7 @@ resolver = "2"
 members = [
     "crates/threebug-core",
     "crates/threebug-server",
-    # "crates/threebug-client",
+    "crates/threebug-client",
 ]
 
 exclude = ["vendor/"]

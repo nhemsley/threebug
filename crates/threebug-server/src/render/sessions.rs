@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{render::Spawnable, resource::session::Sessions};
 
-#[derive(Default)]
+#[derive(Default, Resource)]
 pub struct SessionsState {
     current_session_id: Option<String>,
 }

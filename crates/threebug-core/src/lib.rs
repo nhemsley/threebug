@@ -1,3 +1,4 @@
+use bevy::prelude::Resource;
 use serde::*;
 
 pub mod ipc;
@@ -29,6 +30,7 @@ impl From<u64> for Entity {
     }
 }
 
+#[derive(Resource)]
 pub struct EntityRegistry {
     current: u64,
 }

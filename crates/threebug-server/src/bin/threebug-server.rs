@@ -4,6 +4,7 @@ use bevy::{
     // diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     input::mouse::MouseWheel,
     prelude::*,
+    window::CursorGrabMode,
     // render::wireframe::WireframePlugin,
     // wgpu::{WgpuFeature, WgpuFeatures, WgpuOptions},
 };
@@ -22,7 +23,8 @@ use bevy::{
 use bevy_egui::{EguiContext, EguiPlugin};
 use bevy_spicy_networking::*;
 use smooth_bevy_cameras::{
-    controllers::fps_3d::{Fps3dCameraBundle, Fps3dCameraController, Fps3dCameraPlugin},
+    controllers::fps::{FpsCameraBundle, FpsCameraController, FpsCameraPlugin},
+    // controllers::fps_3d::{Fps3dCameraBundle, Fps3dCameraController, Fps3dCameraPlugin},
     LookTransformPlugin,
 };
 
@@ -35,7 +37,7 @@ use threebug_server::{
 use threebug_server::ui;
 
 fn main() {
-    let mut app = App::build();
+    let mut app = App::new();
 
     app
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
@@ -54,20 +56,20 @@ fn main() {
         .add_plugin(bevy_spicy_networking::ServerPlugin)
         // smooth bevy cameras
         .add_plugin(LookTransformPlugin)
-        .add_plugin(Fps3dCameraPlugin::default())
+        .add_plugin(FpsCameraPlugin::default())
         // bevy egui
         .add_plugin(EguiPlugin)
-        .add_system(ui::ui.system())
-        .add_startup_system(setup.system())
-        .add_system(fps.system())
-        .add_system(cursor_grab_system.system())
-        .add_system(render.system());
+        .add_system(ui::ui)
+        .add_startup_system(setup)
+        .add_system(fps)
+        .add_system(cursor_grab_system)
+        .add_system(render);
 
     // Register parry server messages
     register_server_network_messages(&mut app);
-    app.add_startup_system(setup_networking.system())
-        .add_system(handle_connection_events.system())
-        .add_system(handle_messages.system());
+    app.add_startup_system(setup_networking)
+        .add_system(handle_connection_events)
+        .add_system(handle_messages);
 
     app.insert_resource(Sessions::default());
     app.insert_resource(SessionsState::default());
@@ -100,17 +102,14 @@ fn setup(
     mut _meshes: ResMut<Assets<Mesh>>,
     mut _materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    commands.spawn_bundle(Fps3dCameraBundle::new(
-        Fps3dCameraController {
-            enabled: false,
-            ..Default::default()
-        },
-        PerspectiveCameraBundle::default(),
-        Vec3::new(0.0, 0.0, 15.0),
-        Vec3::new(0., 0., 0.),
-    ));
+    commands
+        .spawn(Camera3dBundle::default())
+        .insert(FpsCameraBundle::new(
+            FpsCameraController::default(),
+            Vec3::new(-2.0, 5.0, 5.0),
+            Vec3::new(0., 0., 0.),
+        ));
 }
-
 fn render(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -200,22 +199,22 @@ fn cursor_grab_system(
     mut windows: ResMut<Windows>,
     btn: Res<Input<MouseButton>>,
     key: Res<Input<KeyCode>>,
-    mut controllers: Query<&mut Fps3dCameraController>,
-    ui_context: Res<EguiContext>,
+    mut controllers: Query<&mut FpsCameraController>,
+    mut ui_context: ResMut<EguiContext>,
 ) {
     let window = windows.get_primary_mut().unwrap();
 
-    let mut controller = controllers.single_mut().unwrap();
+    let mut controller = controllers.get_single_mut().unwrap();
 
     // we want to be able to catch Esc keys, even if ctx().is_pointer_over_area()
     if key.just_pressed(KeyCode::Escape) {
         info!("disabling fps 3d controller");
         controller.enabled = false;
-        window.set_cursor_lock_mode(false);
+        window.set_cursor_grab_mode(bevy::window::CursorGrabMode::Locked);
         window.set_cursor_visibility(true);
     }
 
-    if ui_context.ctx().is_pointer_over_area() {
+    if ui_context.ctx_mut().is_pointer_over_area() {
         return;
     }
 
@@ -224,7 +223,7 @@ fn cursor_grab_system(
         info!("enabling fps 3d controller");
 
         controller.enabled = true;
-        window.set_cursor_lock_mode(true);
+        window.set_cursor_grab_mode(CursorGrabMode::Locked);
         window.set_cursor_visibility(false);
     }
 }
@@ -234,9 +233,9 @@ fn fps(
     _mouse: Res<Input<MouseButton>>,
     mut mouse_wheel_events: EventReader<MouseWheel>,
     _time: Res<Time>,
-    mut fps: Query<&mut Fps3dCameraController>,
+    mut fps: Query<&mut FpsCameraController>,
 ) {
-    if let Ok(mut fps) = fps.single_mut() {
+    if let Ok(mut fps) = fps.get_single_mut() {
         for event in mouse_wheel_events.iter() {
             //FIXME: move this into some kind of easing function thingy
             let delta = if fps.translate_sensitivity <= 0.2 {
@@ -257,6 +256,6 @@ fn fps(
     }
 }
 
-pub fn register_server_network_messages(app: &mut AppBuilder) {
+pub fn register_server_network_messages(app: &mut App) {
     app.listen_for_server_message::<DebugEntity>();
 }
