@@ -1,7 +1,6 @@
 use core::time;
-use std::{error::Error, net::SocketAddr, thread};
+use std::{error::Error, thread};
 
-use bevy_spicy_networking::{NetworkSettings, StandaloneNetworkClient};
 use parry3d::na::Point3;
 use rand::Rng;
 use structopt::StructOpt;
@@ -26,21 +25,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let opt = Options::from_args();
 
-    let mut client = StandaloneNetworkClient::new();
-    let ip_address = "127.0.0.1".parse().unwrap();
+    let tb_client = threebug_client::client::default_client()
+        .expect("Couldn't connect to server with default args");
 
-    let socket_address = SocketAddr::new(ip_address, 9876);
-
-    info!("Address of the server: {}", socket_address);
-
-    client.connect(
-        socket_address,
-        NetworkSettings {
-            max_packet_length: 10 * 1024 * 1024,
-        },
-    )?;
-
-    info!("Connected");
+    let mut client = tb_client.client;
 
     let mut rng = rand::thread_rng();
 

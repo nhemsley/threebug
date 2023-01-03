@@ -1,12 +1,44 @@
-// static EXISTS: AtomicBool = AtomicBool::new(false);
-// static GLOBAL_INIT: AtomicUsize = AtomicUsize::new(UNINITIALIZED);
+pub mod client {
+    use std::{
+        error::Error,
+        net::{IpAddr, SocketAddr},
+    };
 
-// #[cfg(feature = "std")]
-// static SCOPED_COUNT: AtomicUsize = AtomicUsize::new(0);
+    use bevy_spicy_networking::{NetworkSettings, StandaloneNetworkClient};
 
-// const UNINITIALIZED: usize = 0;
-// const INITIALIZING: usize = 1;
-// const INITIALIZED: usize = 2;
+    pub struct ThreeBugClient {
+        pub client: StandaloneNetworkClient,
+        pub ip_address: IpAddr,
+        pub port: u16,
+        pub socket_address: SocketAddr,
+    }
+
+    pub fn default_client() -> Result<ThreeBugClient, Box<dyn Error>> {
+        let mut client = StandaloneNetworkClient::new();
+        let ip_address = "127.0.0.1".parse().unwrap();
+        let port = 9876;
+
+        let socket_address = SocketAddr::new(ip_address, port);
+
+        // info!("Address of the server: {}", socket_address);
+
+        client.connect(
+            socket_address,
+            NetworkSettings {
+                max_packet_length: 10 * 1024 * 1024,
+            },
+        )?;
+
+        let client = ThreeBugClient {
+            client,
+            ip_address,
+            port,
+            socket_address,
+        };
+
+        Ok(client)
+    }
+}
 
 pub fn init() {}
 
