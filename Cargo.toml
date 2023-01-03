@@ -1,0 +1,13 @@
+[workspace]
+resolver = "2"
+
+members = [
+    "crates/threebug-core",
+    "crates/threebug-server",
+    # "crates/threebug-client",
+]
+
+exclude = ["vendor/"]
+
+[patch.crates-io]
+
