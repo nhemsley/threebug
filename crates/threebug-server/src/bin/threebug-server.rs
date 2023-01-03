@@ -3,22 +3,14 @@ use std::net::SocketAddr;
 use bevy::{
     // diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     input::mouse::MouseWheel,
+    pbr::wireframe::WireframePlugin,
     prelude::*,
+    render::{
+        settings::{WgpuFeatures, WgpuSettings},
+        RenderPlugin,
+    },
     window::CursorGrabMode,
-    // render::wireframe::WireframePlugin,
-    // wgpu::{WgpuFeature, WgpuFeatures, WgpuOptions},
 };
-// {
-//     core::Time,
-//     diagnostic::LogDiagnosticsPlugin,
-//     ecs::prelude::*,
-//     input::Input,
-//     math::Vec3,
-//     pbr2::StandardMaterial,
-//     prelude::{error, info, App, Assets, KeyCode, Transform},
-//     render2::{camera::PerspectiveCameraBundle, mesh::Mesh},
-//     PipelinedDefaultPlugins,
-// };
 
 use bevy_egui::{EguiContext, EguiPlugin};
 use bevy_spicy_networking::*;
@@ -39,19 +31,15 @@ use threebug_server::ui;
 fn main() {
     let mut app = App::new();
 
-    app
+    app.add_plugins(DefaultPlugins)
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
         // .add_plugin(LogDiagnosticsPlugin::default())
         // .insert_resource(Msaa { samples: 4 })
-        // .insert_resource(WgpuOptions {
-        //     features: WgpuFeatures {
-        //         // The Wireframe requires NonFillPolygonMode feature
-        //         features: vec![WgpuFeature::NonFillPolygonMode],
-        //     },
-        //     ..Default::default()
-        // })
-        .add_plugins(DefaultPlugins)
-        // .add_plugin(WireframePlugin)
+        .insert_resource(WgpuSettings {
+            features: WgpuFeatures::POLYGON_MODE_LINE,
+            ..default()
+        })
+        .add_plugin(WireframePlugin)
         // bevy spicy networking
         .add_plugin(bevy_spicy_networking::ServerPlugin)
         // smooth bevy cameras

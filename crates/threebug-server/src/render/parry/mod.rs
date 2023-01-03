@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{pbr::wireframe::Wireframe, prelude::*};
 
 use super::{MeshProvider, Spawnable};
 use threebug_core::ipc::parry::*;
@@ -42,7 +42,7 @@ impl Spawnable for AABB {
                 material: materials.add(Color::rgba(0.3, 0.5, 0.3, 0.3).into()),
                 ..Default::default()
             })
-            // .insert(Wireframe)
+            .insert(Wireframe)
             .id();
         self.entity = Some(entity.to_bits().into());
     }
