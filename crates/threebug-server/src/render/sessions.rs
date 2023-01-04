@@ -37,10 +37,15 @@ impl SessionsState {
         commands: &mut Commands,
         meshes: &mut Assets<Mesh>,
         materials: &mut Assets<StandardMaterial>,
+        refresh: bool,
     ) {
+        debug!("SessionsState::spawn_current_session");
         if let Some(current_session_id) = &self.current_session_id {
-            debug!("Spawning session: {}", current_session_id);
             if let Some(session) = sessions.get_mut(current_session_id) {
+                debug!("Spawning session: {}", current_session_id);
+                if refresh {
+                    session.entities.dirty();
+                }
                 session.spawn(commands, meshes, materials)
             }
         }

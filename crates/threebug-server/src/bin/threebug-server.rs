@@ -86,7 +86,6 @@ fn setup_networking(mut net: ResMut<NetworkServer>) {
     info!("Started listening for new connections!");
 }
 
-/// set up a simple 3D scene
 fn setup(
     mut commands: Commands,
     mut _meshes: ResMut<Assets<Mesh>>,
@@ -112,11 +111,13 @@ fn render(
         if let Some(session) = sessions.current_session() {
             if session.entities.is_dirty() {
                 clean_session = true;
+                info!("session is dirty");
                 session_render_state.spawn_current_session(
                     &mut *sessions,
                     &mut commands,
                     &mut *meshes,
                     &mut *materials,
+                    false,
                 );
             }
         }
@@ -126,20 +127,29 @@ fn render(
             }
         }
     } else {
+        info!("session is not current, despawning");
         session_render_state.despawn_current_session(
             &mut *sessions,
             &mut commands,
             &mut *meshes,
             &mut *materials,
         );
+        info!("updating current session");
+
         session_render_state.update_current_session(&*sessions);
+        info!("spawning new session");
 
         session_render_state.spawn_current_session(
             &mut *sessions,
             &mut commands,
             &mut *meshes,
             &mut *materials,
+            true,
         );
+
+        if let Some(session) = sessions.current_session_mut() {
+            session.entities.clean();
+        }
     }
 }
 

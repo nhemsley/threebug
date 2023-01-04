@@ -36,6 +36,11 @@ impl Entities {
         self.prev_clean = self.len();
     }
 
+    pub fn dirty(&mut self) {
+        self.dirty = true;
+        self.prev_clean = 0;
+    }
+
     pub fn is_dirty(&self) -> bool {
         self.dirty
     }

@@ -1,4 +1,4 @@
-use bevy::prelude::Resource;
+use bevy::prelude::{debug, Resource};
 // use bevy::prelude::info;
 // use bevy::prelude::Component;
 use bevy_spicy_networking::ConnectionId;
@@ -99,6 +99,7 @@ impl Sessions {
     }
 
     pub fn current_session(&self) -> Option<&Session> {
+        // debug!("current_session: {:?}", self.current_session_id);
         self.current_session_id
             .as_ref()
             .and_then(|conn_id| self.sessions.get(conn_id))
