@@ -13,6 +13,7 @@ use bevy::{
 };
 
 use bevy_egui::{EguiContext, EguiPlugin};
+use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_spicy_networking::*;
 use smooth_bevy_cameras::{
     controllers::fps::{FpsCameraBundle, FpsCameraController, FpsCameraPlugin},
@@ -47,6 +48,7 @@ fn main() {
         .add_plugin(FpsCameraPlugin::default())
         // bevy egui
         .add_plugin(EguiPlugin)
+        .add_plugin(WorldInspectorPlugin::new())
         .add_system(ui::ui)
         .add_startup_system(setup)
         .add_system(fps)
